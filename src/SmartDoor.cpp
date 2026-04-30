@@ -145,6 +145,11 @@ double SmartDoor::ratedWattage() const
     return m_powerStatus ? 0.5 : 0.0; // 0.5 W standby; 0 W off
 }
 
+void SmartDoor::update()
+{
+    // Integrated from Task 5 (empty body in original design)
+}
+
 void SmartDoor::displayStatus() const
 {
     std::cout << std::left

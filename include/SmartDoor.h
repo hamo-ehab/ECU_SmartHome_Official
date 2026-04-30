@@ -54,6 +54,8 @@ public:
     void unlock();
     void toggleLock();
 
+    void update() override; // Integrated from Task 5
+
     bool getLockStatus() const { return m_isLocked; }
     void showLogs() const;
 
