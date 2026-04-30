@@ -1,23 +1,11 @@
-/*
- * =============================================================================
- * FILE: include/AutomationRuleEngine.h
- * PROJECT: ECU Smart Home System
- * ORIGINAL AUTHOR: Mohamed Sameh Ghonem (ID: 692500817)
- * REVIEWED & OPTIMIZED BY: Eng. Zain
- * MERGED FROM ORIGINAL FILES:
- *   - AutomationRuleEngine.cpp       (onSensorUpdate / evaluateCondition)
- *   - AutomationRuleEngine (1).cpp   (duplicate — identical logic, removed)
- *   - AutomationRuleEngine (1)(1).cpp (executeAction with weak_ptr dispatch)
- * =============================================================================
- * Rule evaluation engine: sensor hot-path, GT/LT/EQ epsilon evaluation,
- * weak_ptr-safe polymorphic action dispatch to registered devices.
- * DECLARATION ONLY — implementations live in src/AutomationRuleEngine.cpp
- * =============================================================================
- */
-
 #ifndef AUTOMATIONRULEENGINE_H
 #define AUTOMATIONRULEENGINE_H
 
+// NEW: دعم Qt
+#include <QObject>
+#include <QString>
+
+// MERGED: من الكود الأول
 #include "SmartDevice.h"
 #include <vector>
 #include <unordered_map>
@@ -27,7 +15,8 @@
 // ---------------------------------------------------------------------------
 // RuleCondition — condition tokens
 // ---------------------------------------------------------------------------
-enum class RuleCondition { GT, LT, EQ };
+// NEW: إضافة GTE و LTE لمرونة أكبر
+enum class RuleCondition { GT, LT, EQ, GTE, LTE };
 
 // ---------------------------------------------------------------------------
 // RuleAction — action identifiers
@@ -43,31 +32,74 @@ struct AutomationRule
     int           targetSensorID;
     RuleCondition condition;
     double        threshold;
-    std::string   deviceId;
+
+    // CHANGED: deviceId -> deviceID (توحيد naming)
+    std::string   deviceID;
+
     RuleAction    action;
     bool          enabled;
 };
 
 // ---------------------------------------------------------------------------
-// AutomationRuleEngine
+// AutomationRuleEngine (MERGED with QObject)
 // ---------------------------------------------------------------------------
-class AutomationRuleEngine
+class AutomationRuleEngine : public QObject
 {
-private:
-    std::vector<AutomationRule>                                    m_rules;
-    std::unordered_map<std::string, std::weak_ptr<SmartDevice>>    deviceMap;
+    Q_OBJECT   // NEW: required for signals/slots
 
-    // Private helpers — implementations in AutomationRuleEngine.cpp
+private:
+    // MERGED: من الكود الأول
+    std::vector<AutomationRule> m_rules;
+
+    // MERGED: device map
+    std::unordered_map<std::string, std::weak_ptr<SmartDevice>> deviceMap;
+
+    // NEW: تحسين الأداء (rules لكل sensor)
+    std::unordered_map<int, std::vector<AutomationRule>> rulesBySensor;
+
+    // -----------------------------------------------------------------------
+    // Helpers
+    // -----------------------------------------------------------------------
     bool evaluateCondition(const AutomationRule& rule, double value) const;
-    void executeAction    (const AutomationRule& rule);
+
+    // CHANGED: بقت بتعمل logging كمان
+    void executeAction(const AutomationRule& rule);
+
+    // NEW: logging helper من كود Qt
+    void log(const QString& msg);
 
 public:
-    void   addRule        (const AutomationRule& rule);
-    void   registerDevice (const std::string& id,
-                           const std::shared_ptr<SmartDevice>& device);
-    void   onSensorUpdate (int sensorID, double value);
-    void   clearRules     ();
-    size_t ruleCount      () const;
+    // NEW: constructor بتاع Qt
+    explicit AutomationRuleEngine(QObject *parent = nullptr);
+
+    // -----------------------------------------------------------------------
+    // Rule Management
+    // -----------------------------------------------------------------------
+    void   addRule(const AutomationRule& rule);        // CHANGED: هتحدث rulesBySensor
+    void   clearRules();
+    size_t ruleCount() const;
+
+    // NEW: enable/disable rules بدل التعديل اليدوي
+    void enableRule(int ruleID);
+    void disableRule(int ruleID);
+
+    // -----------------------------------------------------------------------
+    // Device Management
+    // -----------------------------------------------------------------------
+    void registerDevice(const std::string& id,
+                        const std::shared_ptr<SmartDevice>& device);
+
+    // -----------------------------------------------------------------------
+    // Runtime
+    // -----------------------------------------------------------------------
+    void onSensorUpdate(int sensorID, double value);
+
+    // NEW: من كود Qt — تشغيل rule بالاسم
+    void processRuleTriggered(const std::string& ruleName);
+
+signals:
+    // MERGED: signal من كود Qt
+    void eventLogged(const QString& message);
 };
 
 #endif // AUTOMATIONRULEENGINE_H
