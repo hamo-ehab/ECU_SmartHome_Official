@@ -1,3 +1,20 @@
+/*
+ * =============================================================================
+ * FILE: include/AutomationRuleEngine.h
+ * PROJECT: ECU Smart Home System
+ * ORIGINAL AUTHOR: Mohamed Sameh Ghonem (ID: 692500817)
+ * REVIEWED & OPTIMIZED BY: Eng. Zain
+ * MERGED FROM ORIGINAL FILES:
+ *   - AutomationRuleEngine.cpp       (onSensorUpdate / evaluateCondition)
+ *   - AutomationRuleEngine (1).cpp   (duplicate — identical logic, removed)
+ *   - AutomationRuleEngine (1)(1).cpp (executeAction with weak_ptr dispatch)
+ * =============================================================================
+ * Rule evaluation engine: sensor hot-path, GT/LT/EQ epsilon evaluation,
+ * weak_ptr-safe polymorphic action dispatch to registered devices.
+ * DECLARATION ONLY — implementations live in src/AutomationRuleEngine.cpp
+ * =============================================================================
+ */
+
 #ifndef AUTOMATIONRULEENGINE_H
 #define AUTOMATIONRULEENGINE_H
 

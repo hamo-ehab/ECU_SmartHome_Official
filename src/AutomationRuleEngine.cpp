@@ -1,3 +1,21 @@
+/*
+ * =============================================================================
+ * FILE: src/AutomationRuleEngine.cpp
+ * PROJECT: ECU Smart Home System
+ * ORIGINAL AUTHOR: Mohamed Sameh Ghonem (ID: 692500817)
+ * REVIEWED & OPTIMIZED BY: Eng. Zain
+ * MERGED FROM ORIGINAL FILES:
+ *   - AutomationRuleEngine.cpp       (onSensorUpdate / evaluateCondition impls)
+ *   - AutomationRuleEngine (1)(1).cpp (executeAction weak_ptr dispatch impls)
+ * =============================================================================
+ * AutomationRuleEngine implementations:
+ *   - evaluateCondition: GT / LT / EQ with epsilon float comparison
+ *   - executeAction: weak_ptr lock, polymorphic vtable dispatch (no dynamic_cast)
+ *   - onSensorUpdate: hot-path rule iteration
+ *   - addRule / registerDevice / clearRules / ruleCount
+ * =============================================================================
+ */
+
 #include "../include/AutomationRuleEngine.h"
 
 // MERGED: دعم Qt logging
