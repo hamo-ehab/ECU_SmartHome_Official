@@ -147,7 +147,25 @@ int main()
     for (int i = 0; i < 20; ++i)
         motionSensor->simulate();
 
-    // ---- 9. Shutdown sequence (governed by Eng Zain / Muhammad Ehab) -------
+    // ---- 9. SmartDoor Day 5 Simulation --------------------------------------
+    banner("SmartDoor Day 5 Simulation");
+    {
+        std::cout << "--- ECU Smart Home: Day 5 Simulation ---\n\n";
+        SmartDoor myDoor("DOOR-05", "Day 5 Task Door", true);
+
+        myDoor.unlock();
+        std::cout << "[Normal State] User opened the door.\n";
+        myDoor.displayStatus();
+
+        std::cout << "\n[SIMULATION] SIMULATING POWER OUTAGE...\n\n";
+        myDoor.turnOff(); // Architectural equivalent of setPowerStatus(false)
+
+        myDoor.update();
+        std::cout << "\n[Status after Emergency Tick]\n";
+        myDoor.displayStatus();
+    }
+
+    // ---- 10. Shutdown sequence (governed by Eng Zain / Muhammad Ehab) -------
     banner("System Shutdown");
 
     engine.clearRules();  // Step 1: clear rule references
