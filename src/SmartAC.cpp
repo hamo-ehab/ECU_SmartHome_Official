@@ -22,6 +22,7 @@
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+#include <vector>
 
 // ---- Constructors ----------------------------------------------------------
 
@@ -71,43 +72,59 @@ SmartAC::Mode SmartAC::stringToMode(const std::string& s)
 
 std::string SmartAC::serialise() const
 {
-    // Format: "<base_power>,<mode>,<temperature>"   e.g. "1,COOLING,22.5"
-    std::ostringstream oss;
-    oss << SmartDevice::serialise()
-        << "," << modeToString(m_mode)
-        << "," << m_temperature;
-    return oss.str();
+    std::stringstream ss;
+    // نضع اسم الكلاس في البداية لتمكين الـ PersistenceManager من التعرف عليه
+    ss << "SmartAC" << ",";
+    ss << m_deviceID << ",";
+    ss << (m_powerStatus ? "1" : "0") << ",";
+    ss << modeToString(m_mode) << ",";
+    
+    // استخدام fixed و setprecision لضمان رقم عشري واحد فقط (مثل 24.5)
+    ss << std::fixed << std::setprecision(1) << m_temperature;
+    
+    return ss.str();
 }
 
 void SmartAC::deserialise(const std::string& data)
 {
-    try
-    {
-        std::istringstream iss(data);
-        std::string token;
+    std::stringstream ss(data);
+    std::string token;
+    std::vector<std::string> tokens;
 
-        // Token 0: base power
-        if (!std::getline(iss, token, ','))
-            throw std::invalid_argument("Missing power token");
-        SmartDevice::deserialise(token);
-
-        // Token 1: mode string
-        if (!std::getline(iss, token, ','))
-            throw std::invalid_argument("Missing mode token");
-        m_mode = stringToMode(token);
-
-        // Token 2: temperature double
-        if (!std::getline(iss, token, ','))
-            throw std::invalid_argument("Missing temperature token");
-        m_temperature = std::clamp(std::stod(token), 16.0, 30.0);
+    // تقطيع السطر بناءً على الفاصلة
+    while (std::getline(ss, token, ',')) {
+        tokens.push_back(token);
     }
-    catch (const std::out_of_range& e)
-    {
-        std::cerr << "[SmartAC] deserialise out_of_range: " << e.what() << "\n";
+
+    // التأكد من أن السطر يحتوي على البيانات المطلوبة
+    // وندعم كلا الصيغتين: القديمة (3) والجديدة (5) التي تبدأ بـ SmartAC
+    bool isNewFormat = (!tokens.empty() && tokens[0] == "SmartAC");
+    
+    if (isNewFormat && tokens.size() < 5) {
+        std::cerr << "Error: Invalid CSV format for SmartAC\n";
+        return;
+    } else if (!isNewFormat && tokens.size() < 3) {
+        return;
     }
-    catch (const std::invalid_argument& e)
-    {
-        std::cerr << "[SmartAC] deserialise invalid_argument: " << e.what() << "\n";
+
+    try {
+        if (isNewFormat) {
+            m_deviceID = tokens[1];
+            m_powerStatus = (tokens[2] == "1");
+            m_mode = stringToMode(tokens[3]);
+            m_temperature = std::stod(tokens[4]);
+        } else {
+            m_powerStatus = (tokens[0] == "1");
+            m_mode = stringToMode(tokens[1]);
+            m_temperature = std::stod(tokens[2]);
+        }
+        
+        m_temperature = std::clamp(m_temperature, 16.0, 30.0);
+        
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Error: Invalid numeric data in CSV -> " << e.what() << "\n";
+    } catch (const std::out_of_range& e) {
+        std::cerr << "Error: Temperature value out of range -> " << e.what() << "\n";
     }
 }
 
@@ -133,4 +150,5 @@ void SmartAC::displayStatus() const
               << " Mode=" << modeToString(m_mode)
               << " Temp=" << m_temperature << " C"
               << " W="    << ratedWattage() << " W\n";
-}
+            }
+            

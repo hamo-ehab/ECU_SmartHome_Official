@@ -165,7 +165,26 @@ int main()
         myDoor.displayStatus();
     }
 
-    // ---- 10. Shutdown sequence (governed by Eng Zain / Muhammad Ehab) -------
+    // ---- 10. SmartAC Custom Persistence Simulation --------------------------
+    banner("SmartAC Custom Persistence Simulation");
+    {
+        std::cout << "--- التجربة الخاصة بالتسلسل (Serialization) ---\n\n";
+        SmartAC myAC("LivingRoom_AC", "Living Room AC", SmartAC::Mode::COOLING, 23.555);
+        myAC.turnOn(); // Sets m_powerStatus to true to match user's 'true' param
+
+        // Serialization
+        std::string csvLine = myAC.serialise();
+        std::cout << "Serialized Data: " << csvLine << "\n";
+
+        // Deserialization
+        SmartAC newAC("TEMP_ID", "Temp AC", SmartAC::Mode::FAN_ONLY, 20.0);
+        newAC.deserialise(csvLine);
+        
+        std::cout << "Deserialized Object:\n";
+        newAC.displayStatus();
+    }
+
+    // ---- 11. Shutdown sequence (governed by Eng Zain / Muhammad Ehab) -------
     banner("System Shutdown");
 
     engine.clearRules();  // Step 1: clear rule references
