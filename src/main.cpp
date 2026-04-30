@@ -117,7 +117,7 @@ int main()
     rule1.targetSensorID = 42;
     rule1.condition      = RuleCondition::GT;
     rule1.threshold      = 0.5;
-    rule1.deviceId       = "LIGHT-01";
+    rule1.deviceID       = "LIGHT-01";
     rule1.action         = RuleAction::TURN_ON;
     rule1.enabled        = true;
 
