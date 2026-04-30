@@ -147,14 +147,24 @@ double SmartDoor::ratedWattage() const
 
 void SmartDoor::update()
 {
-    // Integrated from Task 5 (empty body in original design)
+    // Integrated from Task 5
+    if (!getPowerStatus() && !m_isLocked)
+    {
+        std::cout << "[EMERGENCY HEARTBEAT] Power loss detected! Auto-securing door...\n";
+        lock();
+    }
 }
 
 void SmartDoor::displayStatus() const
 {
-    std::cout << std::left
-              << std::setw(15) << "[SmartDoor]"
-              << " ID="    << m_deviceID
-              << " Power=" << m_powerStatus
-              << " Locked="<< m_isLocked << "\n";
+    std::cout << "--- Smart Door Status ---\n";
+    std::cout << "Power:  " << (getPowerStatus() ? "ON" : "OFF") << "\n";
+    std::cout << "Status: " << (m_isLocked ? "LOCKED" : "UNLOCKED") << "\n";
+    std::cout << "Access Log:\n";
+
+    for (const auto& event : m_accessLog)
+    {
+        std::cout << "    -> " << event << "\n";
+    }
+    std::cout << "-------------------------\n";
 }
