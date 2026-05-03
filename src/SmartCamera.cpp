@@ -18,6 +18,7 @@
  */
 
 #include "../include/SmartCamera.h"
+#include "../include/VoiceService.h"
 #include <sstream>
 #include <iostream>
 #include <iomanip>

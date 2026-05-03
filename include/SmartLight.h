@@ -25,7 +25,6 @@
 #define SMARTLIGHT_H
 
 #include "SmartDevice.h"
-#include "VoiceService.h"
 
 class SmartLight : public SmartDevice
 {

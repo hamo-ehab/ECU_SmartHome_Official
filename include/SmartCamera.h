@@ -19,7 +19,6 @@
 #define SMARTCAMERA_H
 
 #include "SmartDevice.h"
-#include "VoiceService.h"
 #include <string>
 
 class SmartCamera : public SmartDevice

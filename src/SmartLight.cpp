@@ -16,6 +16,7 @@
  */
 
 #include "../include/SmartLight.h"
+#include "../include/VoiceService.h"
 #include <algorithm>  // std::clamp
 #include <iostream>
 #include <iomanip>
