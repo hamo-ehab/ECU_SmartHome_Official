@@ -27,8 +27,9 @@
 #include "SmartDevice.h"
 #include <vector>
 #include <string>
+#include <memory>
 
-class SmartDoor : public SmartDevice
+class SmartDoor : public SmartDevice, public std::enable_shared_from_this<SmartDoor>
 {
 private:
     bool m_isLocked;
@@ -48,11 +49,13 @@ public:
     SmartDoor(const SmartDoor&)            = delete;
     SmartDoor& operator=(const SmartDoor&) = delete;
 
-    virtual ~SmartDoor() override = default;
+    virtual ~SmartDoor() override;
 
-    void lock();
-    void unlock();
-    void toggleLock();
+    void lock(bool silent = false);
+    void unlock(bool silent = false);
+    void toggleLock(bool silent = false);
+
+    void simulateAsyncQtCallback();
 
     void update() override; // Integrated from Task 5
 

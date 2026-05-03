@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/mnt/sdb1/Projects/Project Programming ||/ECU_SHA",
-      "program": "/mnt/sdb1/Projects/Project Programming ||/ECU_SHA/build/Debug/outDebug",
+      "cwd": "/mnt/sdb1/Projects ECU/Project Programming 2/ECU_SHA/src",
+      "program": "/mnt/sdb1/Projects ECU/Project Programming 2/ECU_SHA/src/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

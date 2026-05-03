@@ -74,33 +74,63 @@ SmartDoor::SmartDoor(const std::string& deviceID,
               << "' created. Fail-Secure (Locked=true).\n";
 }
 
+SmartDoor::~SmartDoor()
+{
+    std::cout << "[Destructor] SmartDoor destroyed safely.\n";
+}
+
 // ---- Lock / Unlock / Toggle ------------------------------------------------
 
-void SmartDoor::lock()
+void SmartDoor::lock(bool silent)
 {
     if (m_isLocked) return;       // Guard: already locked — no-op
     turnOn();                     // Ensure power is on before engaging bolt
     m_isLocked = true;
     logEvent("LOCKED");
-    std::cout << "[Action] Door is now LOCKED.\n";
-    VoiceService::instance().playSound(VoiceService::SoundType::MechanicalGear);
-    VoiceService::instance().speak(m_deviceName + " is now Locked");
+    
+    if (!silent) {
+        std::cout << "[Action] Door is now LOCKED.\n";
+        VoiceService::instance().playSound(VoiceService::SoundType::MechanicalGear);
+        VoiceService::instance().speak(m_deviceName + " is now Locked");
+    }
 }
 
-void SmartDoor::unlock()
+void SmartDoor::unlock(bool silent)
 {
     if (!m_isLocked) return;      // Guard: already unlocked — no-op
     m_isLocked = false;
     logEvent("UNLOCKED");
-    std::cout << "[Action] Door is now UNLOCKED.\n";
-    VoiceService::instance().playSound(VoiceService::SoundType::MechanicalGear);
-    VoiceService::instance().speak(m_deviceName + " is now Unlocked");
+    
+    if (!silent) {
+        std::cout << "[Action] Door is now UNLOCKED.\n";
+        VoiceService::instance().playSound(VoiceService::SoundType::MechanicalGear);
+        VoiceService::instance().speak(m_deviceName + " is now Unlocked");
+    }
 }
 
-void SmartDoor::toggleLock()
+void SmartDoor::toggleLock(bool silent)
 {
-    if (m_isLocked) unlock();
-    else             lock();
+    if (m_isLocked) unlock(silent);
+    else             lock(silent);
+}
+
+void SmartDoor::simulateAsyncQtCallback()
+{
+    std::weak_ptr<SmartDoor> weakSelf = weak_from_this();
+
+    auto qtLambda = [weakSelf]()
+    {
+        if (std::shared_ptr<SmartDoor> safeSelf = weakSelf.lock())
+        {
+            std::cout << "[Lambda] Object is ALIVE. Executing safely...\n";
+            safeSelf->toggleLock();
+        }
+        else
+        {
+            std::cout << "[Lambda] WARNING: Object is DEAD. Callback cancelled safely.\n";
+        }
+    };
+    qtLambda();
 }
 
 // ---- Log display -----------------------------------------------------------

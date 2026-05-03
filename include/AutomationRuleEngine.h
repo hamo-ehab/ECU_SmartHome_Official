@@ -19,8 +19,8 @@
 #define AUTOMATIONRULEENGINE_H
 
 // NEW: دعم Qt
-#include <QObject>
-#include <QString>
+#include <QtCore/QObject>
+#include <QtCore/QString>
 
 // MERGED: من الكود الأول
 #include "SmartDevice.h"
@@ -118,5 +118,44 @@ signals:
     // MERGED: signal من كود Qt
     void eventLogged(const QString& message);
 };
+
+#ifndef SINGLETON_H
+#define SINGLETON_H
+
+#include <iostream>
+#include <memory>
+#include <vector>
+#include <QtCore/QObject>
+#include <QtCore/QString>
+
+class MySingleton : public QObject {
+    Q_OBJECT
+
+public:
+    // الوصول إلى النسخة الوحيدة
+    static std::shared_ptr<MySingleton> getInstance();
+
+    // الدالة المطلوبة لعمل teardown يدوي
+    static void resetInstance();
+
+    // مثال على إدارة البيانات (rules vector)
+    void addRule(const QString& rule);
+    
+    // التدمير (Destructor) - هنا يقع المنطق الحرج
+    ~MySingleton();
+
+private:
+    // إخفاء الـ Constructor لضمان نمط الـ Singleton
+    explicit MySingleton(QObject* parent = nullptr);
+
+    // منع النسخ والنقل
+    MySingleton(const MySingleton&) = delete;
+    MySingleton& operator=(const MySingleton&) = delete;
+
+    static std::shared_ptr<MySingleton> s_instance;
+    std::vector<QString> m_rules; // Rules vector المذكور في المتطلبات
+};
+
+#endif // SINGLETON_H
 
 #endif // AUTOMATIONRULEENGINE_H
